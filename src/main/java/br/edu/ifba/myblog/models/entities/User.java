@@ -4,6 +4,7 @@ import br.edu.ifba.myblog.models.Name;
 import br.edu.ifba.myblog.models.Login;
 import br.edu.ifba.myblog.models.Password;
 
+import br.edu.ifba.myblog.models.dto.UserDto;
 import jakarta.persistence.*;
 
 @Entity(name = "users")
@@ -27,6 +28,12 @@ public class User {
         this.password = password;
     }
 
+    public User(UserDto userDto) {
+        name = userDto.name();
+        login = userDto.login();
+        password = userDto.password();
+    }
+
     public long getId() {
         return id;
     }
@@ -43,15 +50,15 @@ public class User {
         this.login = login;
     }
 
-    public String getName() {
-        return name.getName();
+    public Name getName() {
+        return name;
     }
 
-    public String getLogin() {
-        return login.getLogin();
+    public Login getLogin() {
+        return login;
     }
 
-    public String getPassword() {
-        return password.getPassword();
+    public Password getPassword() {
+        return password;
     }
 }

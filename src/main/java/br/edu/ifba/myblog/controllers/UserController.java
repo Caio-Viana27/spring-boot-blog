@@ -1,10 +1,13 @@
 package br.edu.ifba.myblog.controllers;
 
+import br.edu.ifba.myblog.models.dto.UserDto;
 import br.edu.ifba.myblog.models.entities.User;
 import br.edu.ifba.myblog.repositories.UsersRepository;
 
+import java.net.URI;
 import java.util.List;
 
+import br.edu.ifba.myblog.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +15,26 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
 
-    private final UsersRepository repository;
+    private final UserService userService;
 
-    public UserController(UsersRepository repository) {
-        this.repository = repository;
+    public UserController(UserService service) {
+        this.userService = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<List<UserDto>> registerUsers(@RequestBody List<UserDto> userDtoList) {
+
+        if (userService.registerUsers(userDtoList)) {
+            URI location = URI.create("/posts/{id}");
+            return ResponseEntity.created(location).build();
+        }
+
+        return ResponseEntity.badRequest().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getUsers() {
-        List<User> users = repository.findAll();
+    public ResponseEntity<List<UserDto>> getUsers() {
+        List<UserDto> users = userService.getUsers();
 
         if (users.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -30,21 +44,14 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable long id) {
+    public ResponseEntity<UserDto> getUser(@PathVariable long id) {
 
-        if (repository.findById(id).isPresent()) {
-            return ResponseEntity.ok(repository.findById(id).get());
+        UserDto userDto = userService.getUser(id);
+
+        if (userDto == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        //User createdPost = userService.create(dto);
-        //URI location = URI.create("/posts/" + createdPost.getId());
-        repository.save(user);
-
-        return ResponseEntity.status(201).build();
+        return ResponseEntity.ok(userDto);
     }
 }
